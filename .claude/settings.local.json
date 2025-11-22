@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "Bash(python -m pip:*)",
+      "Bash(python:*)",
+      "Bash(timeout 60 python:*)",
+      "Bash(find:*)",
+      "Bash(timeout 30 python:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

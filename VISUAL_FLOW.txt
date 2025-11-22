@@ -1,0 +1,270 @@
+════════════════════════════════════════════════════════════════════════════════
+                    INFINITE RESEARCH - COMPLETE FLOW
+════════════════════════════════════════════════════════════════════════════════
+
+USER INPUT:
+  • Research Topic: "Quantum Computing"
+  • Input Files: quantum_paper.pdf, notes.txt
+
+════════════════════════════════════════════════════════════════════════════════
+                         ITERATION 1: INITIAL RESEARCH
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ CONTEXT ──────────────────────────────────────────────────────────┐
+  │ ✓ User prompt: "Research quantum computing..."                    │
+  │ ✓ Input files: quantum_paper.pdf + notes.txt (ALL CONTENT)        │
+  │ ✓ AI instructions                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+              [ AI analyzes objective + user materials ]
+              [ Executes 6 parallel DuckDuckGo searches ]
+              [ Synthesizes comprehensive document ]
+                                    ↓
+  ┌─ OUTPUT ───────────────────────────────────────────────────────────┐
+  │ → refinement-0001.md (3000 chars)                                  │
+  │   • Researched with user's context                                 │
+  │   • 25 sources from web                                            │
+  │   • Aligned with user's input files                                │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                      ITERATION 2: FIRST REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ CONTEXT ──────────────────────────────────────────────────────────┐
+  │ ✓ System prompt: "Refine and improve..."                          │
+  │ ✓ refinement-0001.md                                               │
+  │ ✗ NO input files                                                   │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+              [ AI searches for more depth ]
+              [ Adds recent developments ]
+              [ Improves clarity ]
+                                    ↓
+  ┌─ OUTPUT ───────────────────────────────────────────────────────────┐
+  │ → refinement-0002.md (3500 chars, improved!)                       │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                      ITERATION 3: SECOND REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ CONTEXT ──────────────────────────────────────────────────────────┐
+  │ ✓ System prompt: "Refine and improve..."                          │
+  │ ✓ refinement-0001.md (for context)                                 │
+  │ ✓ refinement-0002.md (latest)                                      │
+  │ ✓ KB/RAG top-3 chunks                                              │
+  │ ✗ NO input files                                                   │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+  ┌─ OUTPUT ───────────────────────────────────────────────────────────┐
+  │ → refinement-0003.md (4000 chars)                                  │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                    ITERATIONS 4-10: CONTINUE REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  Each iteration follows same pattern:
+    Context: System prompt + last 2 refinements + KB/RAG
+    NO input files
+    Output: refinement-000X.md
+
+  → refinement-0004.md
+  → refinement-0005.md
+  → refinement-0006.md
+  → refinement-0007.md
+  → refinement-0008.md
+  → refinement-0009.md
+  → refinement-0010.md
+
+════════════════════════════════════════════════════════════════════════════════
+          ITERATION 11: ⭐ SPECIAL EVALUATION LOOP ⭐ (every 10th)
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ EVALUATION CONTEXT ───────────────────────────────────────────────┐
+  │ ✓ Original user prompt: "Research quantum computing..."           │
+  │ ✓ Input files: quantum_paper.pdf + notes.txt (FULL CONTENT)       │
+  │ ✓ Latest refinement: refinement-0010.md                            │
+  │ ✓ Evaluation task                                                  │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+              ┌──────────────────────────────────────┐
+              │   AI COMPARES & EVALUATES:          │
+              │                                      │
+              │ "Did research achieve objective?"   │
+              │ "How aligned with user's files?"    │
+              │ "What gaps remain?"                 │
+              │ "What's working well?"              │
+              │ "How complete is it?"               │
+              └──────────────────────────────────────┘
+                                    ↓
+  ┌─ EVALUATION OUTPUT ────────────────────────────────────────────────┐
+  │ → report/report-0001.md                                            │
+  │                                                                     │
+  │   Objective Alignment:  7/10                                       │
+  │   Completeness:         6/10                                       │
+  │   Input Alignment:      5/10                                       │
+  │   Overall Progress:     65%                                        │
+  │                                                                     │
+  │   Gaps Identified:                                                 │
+  │     • Missing case studies                                         │
+  │     • Need more technical depth                                    │
+  │     • Quantum cryptography not covered                             │
+  │                                                                     │
+  │   Recommendations:                                                 │
+  │     • Add industry examples                                        │
+  │     • Expand error correction section                              │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                   ITERATION 12: BACK TO REGULAR REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ CONTEXT ──────────────────────────────────────────────────────────┐
+  │ ✓ System prompt: "Refine and improve..."                          │
+  │ ✓ refinement-0010.md                                               │
+  │ ✓ refinement-0011.md                                               │
+  │ ✗ NO input files (back to regular mode)                           │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+  ┌─ OUTPUT ───────────────────────────────────────────────────────────┐
+  │ → refinement-0012.md                                               │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                      ITERATIONS 13-20: REGULAR REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  Same as iterations 4-10:
+    Context: System prompt + last 2 refinements
+    NO input files
+
+  → refinement-0013.md through refinement-0020.md
+
+════════════════════════════════════════════════════════════════════════════════
+          ITERATION 21: ⭐ EVALUATION LOOP #2 ⭐ (every 10th)
+════════════════════════════════════════════════════════════════════════════════
+
+  ┌─ EVALUATION CONTEXT ───────────────────────────────────────────────┐
+  │ ✓ Original prompt + Input files + refinement-0020.md              │
+  └────────────────────────────────────────────────────────────────────┘
+                                    ↓
+  ┌─ OUTPUT ───────────────────────────────────────────────────────────┐
+  │ → report/report-0002.md                                            │
+  │   Overall Progress: 85% (improved from 65%!)                       │
+  │   Fewer gaps, better alignment                                     │
+  └────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                      ITERATIONS 22-30: REGULAR REFINEMENT
+════════════════════════════════════════════════════════════════════════════════
+
+  → refinement-0022.md through refinement-0030.md
+  (NO input files, just refinement)
+
+════════════════════════════════════════════════════════════════════════════════
+          ITERATION 31: ⭐ EVALUATION LOOP #3 ⭐
+════════════════════════════════════════════════════════════════════════════════
+
+  → report/report-0003.md
+    Overall Progress: 95%!
+
+════════════════════════════════════════════════════════════════════════════════
+                           ... CONTINUES INFINITELY ...
+════════════════════════════════════════════════════════════════════════════════
+
+
+SUMMARY:
+═══════
+
+Input Files Usage:
+  ✓ Iteration 1:  Set direction and context
+  ✓ Iteration 11: Compare progress (evaluation)
+  ✓ Iteration 21: Compare progress (evaluation)
+  ✓ Iteration 31: Compare progress (evaluation)
+  ...
+  ✗ All other iterations: NOT used
+
+Regular Refinements (2-10, 12-20, 22-30, ...):
+  • System prompt: "Keep refining, add depth, improve..."
+  • Last 2 refinements
+  • KB/RAG top-3
+  • NO input files
+
+Evaluation Loops (11, 21, 31, ...):
+  • Original prompt + input files + latest refinement
+  • Compare and score
+  • Generate progress report
+  • Continue refinement after
+
+
+OUTPUT STRUCTURE:
+═════════════════
+
+generation/research-XXXXX/
+  │
+  ├── input/                    ← User files copied here
+  │   ├── quantum_paper.pdf
+  │   └── notes.txt
+  │
+  ├── refinement-0001.md       ← Used input files
+  ├── refinement-0002.md       ← NO input
+  ├── refinement-0003.md       ← NO input
+  ├── ...
+  ├── refinement-0010.md       ← NO input
+  ├── refinement-0011.md       ← NO input (continues refining)
+  ├── ...
+  ├── refinement-0020.md
+  │
+  ├── report/                   ← Evaluation reports
+  │   ├── report-0001.md       ← After iteration 11 (compares vs input)
+  │   ├── report-0002.md       ← After iteration 21
+  │   └── report-0003.md       ← After iteration 31
+  │
+  ├── rag/vectors.db
+  └── kb/knowledge.db
+
+
+CONTEXT EFFICIENCY:
+═══════════════════
+
+Iteration 1:     ~1500 tokens (prompt + input files)
+Iterations 2-10: ~2700 tokens (system prompt + last 2 refs)
+Iteration 11:    ~2700 tokens (evaluation: prompt + input + latest ref)
+Iterations 12-20: ~2700 tokens (system prompt + last 2 refs)
+Iteration 21:    ~2700 tokens (evaluation)
+...
+
+All fit in 4K context window! ✓
+
+
+BENEFITS:
+═════════
+
+✓ Input files set baseline (iteration 1)
+✓ AI refines independently (iterations 2-10)
+✓ Evaluation checks progress (iteration 11)
+✓ Continues refining (iterations 12-20)
+✓ Regular progress checks (every 10 iterations)
+✓ No context waste (input files only when needed)
+✓ Perfect for weak models (always under 4K tokens)
+
+
+COMMAND OPTIONS:
+════════════════
+
+# Default: Evaluate every 10 iterations
+python research_orchestrator.py "Topic"
+
+# Evaluate every 5 iterations
+python research_orchestrator.py "Topic" --eval-freq 5
+
+# No evaluation (just keep refining)
+python research_orchestrator.py "Topic" --no-eval
+
+# Custom config file
+python research_orchestrator.py "Topic" --config my_config.yaml
+
+
+════════════════════════════════════════════════════════════════════════════════

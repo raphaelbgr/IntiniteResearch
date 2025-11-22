@@ -1,0 +1,56 @@
+# Infinite Research System Configuration
+
+lmstudio:
+  # Change this to your LMStudio server IP and port
+  base_url: "http://localhost:1234/v1"
+  api_key: "lm-studio"  # Dummy key for compatibility
+  model: "local-model"  # Change to your loaded model name in LMStudio
+  temperature: 0.7
+  max_tokens: 4096
+
+research:
+  # Single agent with parallel DuckDuckGo search (1-10 queries)
+  parallel_search_enabled: true
+  refinement_delay: 10  # Seconds between refinement iterations
+  output_dir: "./generation"
+  max_refinements: null  # null = infinite, or set a number to limit
+
+  # Evaluation/comparison loop
+  enable_evaluation: true   # Enable progress evaluation reports
+  evaluation_frequency: 10  # Run evaluation every N iterations
+
+  # Note: Input files are used in:
+  #   - Iteration 1 (initial research)
+  #   - Evaluation loops only (every 10th iteration)
+  # They are NOT included in regular refinements (2-10, 12-20, etc.)
+
+vector_db:
+  type: "sqlite"  # Options: "sqlite", "pgvector"
+
+  # SQLite Vector Database (Lightweight, file-based)
+  sqlite:
+    db_file: "vectors.db"  # Relative to research directory
+
+  # PgVector (Production-grade, requires PostgreSQL)
+  pgvector:
+    host: "localhost"
+    port: 5432
+    database: "research_db"
+    user: "postgres"
+    password: "password"
+    table_name: "research_vectors"
+
+  # Embedding settings
+  chunk_size: 512
+  chunk_overlap: 50
+  embedding_dimensions: 384  # Depends on your embedding model
+
+storage:
+  type: "sqlite"
+  memory_db: "agent_memory.db"  # Agent conversation memory
+  knowledge_db: "knowledge.db"  # Knowledge base storage
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "research.log"
+  console: true
