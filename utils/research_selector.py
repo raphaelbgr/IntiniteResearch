@@ -20,8 +20,8 @@ class ResearchSelector:
 
         Returns:
             Tuple of (action, session_info) where:
-            - action is 'new' or 'continue'
-            - session_info is None for new, or dict with session details for continue
+            - action is 'new', 'continue', or 'compile'
+            - session_info is None for new, or dict with session details
         """
         sessions = self.file_manager.get_research_sessions_with_details()
 
@@ -38,11 +38,14 @@ class ResearchSelector:
         print()
 
         if continuable:
-            print("  --- Continue Existing Research ---\n")
+            print("  --- Existing Research ---\n")
 
             for i, session in enumerate(continuable, 1):
                 self._display_session_option(i, session)
 
+            print()
+            print("  --- Actions ---")
+            print(f"  [C] Compile/Generate CONCLUSION for a research")
             print()
 
         print("=" * 70)
@@ -50,10 +53,14 @@ class ResearchSelector:
         # Get user input
         while True:
             try:
-                choice = input("\nEnter your choice (0 for new, or number to continue): ").strip()
+                choice = input("\nEnter choice (0=new, 1-N=continue, C=compile): ").strip()
 
                 if choice == '0' or choice.lower() == 'new':
                     return ('new', None)
+
+                if choice.lower() == 'c':
+                    # Compile mode - ask which research
+                    return self._select_for_compile(continuable)
 
                 choice_num = int(choice)
 
@@ -62,12 +69,56 @@ class ResearchSelector:
                     print(f"\n>>> Continuing research: {selected['topic'][:60]}...")
                     return ('continue', selected)
                 else:
-                    print(f"Invalid choice. Enter 0-{len(continuable)}")
+                    print(f"Invalid choice. Enter 0-{len(continuable)} or C")
+
+            except ValueError:
+                print("Please enter a valid number or C")
+            except KeyboardInterrupt:
+                print("\n\nExiting...")
+                return None
+
+    def _select_for_compile(self, sessions: list) -> Optional[Tuple[str, dict]]:
+        """Select a research session for compilation.
+
+        Args:
+            sessions: List of available sessions
+
+        Returns:
+            Tuple of ('compile', session_info) or None
+        """
+        if not sessions:
+            print("No research sessions available to compile.")
+            return None
+
+        print("\n" + "-" * 50)
+        print("SELECT RESEARCH TO COMPILE")
+        print("-" * 50)
+
+        for i, session in enumerate(sessions, 1):
+            topic = session['topic'][:50] + "..." if len(session['topic']) > 50 else session['topic']
+            print(f"  [{i}] {topic}")
+            print(f"      v{session['latest_version']} | {session['total_sources']} sources")
+
+        print(f"  [0] Cancel")
+
+        while True:
+            try:
+                choice = input("\nSelect research to compile: ").strip()
+
+                if choice == '0':
+                    return self.display_menu()  # Go back to main menu
+
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(sessions):
+                    selected = sessions[choice_num - 1]
+                    print(f"\n>>> Compiling: {selected['topic'][:50]}...")
+                    return ('compile', selected)
+                else:
+                    print(f"Invalid. Enter 0-{len(sessions)}")
 
             except ValueError:
                 print("Please enter a valid number")
             except KeyboardInterrupt:
-                print("\n\nExiting...")
                 return None
 
     def _display_session_option(self, number: int, session: dict):

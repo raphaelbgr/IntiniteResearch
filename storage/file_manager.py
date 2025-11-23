@@ -48,6 +48,7 @@ class FileManager:
         (research_dir / "kb").mkdir(exist_ok=True)
         (research_dir / "memory").mkdir(exist_ok=True)
         (research_dir / "logs").mkdir(exist_ok=True)
+        (research_dir / "conclusion").mkdir(exist_ok=True)
 
         logger.info(f"Created research directory: {research_dir}")
 

@@ -43,6 +43,7 @@ from storage.source_kb import SourceKnowledgeBase
 from agents.research_agent import ResearchAgent
 from refinement.refiner import RefinementEngine
 from refinement.evaluator import ResearchEvaluator
+from refinement.compiler import ResearchCompiler
 
 
 class ResearchOrchestrator:
@@ -539,6 +540,73 @@ class ResearchOrchestrator:
         finally:
             await self.cleanup()
 
+    async def run_compile(self, session_info: dict):
+        """Compile research into a conclusion document.
+
+        Args:
+            session_info: Dict with research session details
+        """
+        try:
+            self.research_id = session_info['research_id']
+            self.base_topic = session_info['topic']
+
+            self.logger.header("Research Compilation", style="bold magenta")
+            self.logger.info(f"Research ID: {self.research_id}")
+            self.logger.info(f"Topic: {self.base_topic[:60]}...")
+
+            # Get research directory
+            self.research_dir = self.file_manager.get_research_directory(self.research_id)
+
+            # Initialize components needed for compilation
+            self.vector_store = VectorStore(
+                research_id=self.research_id,
+                base_dir=self.research_dir,
+                db_type=self.vector_db_config.get('type', 'sqlite')
+            )
+
+            self.source_kb = SourceKnowledgeBase(
+                research_id=self.research_id,
+                base_dir=self.research_dir
+            )
+
+            self.research_agent = ResearchAgent(
+                research_id=self.research_id,
+                research_dir=self.research_dir,
+                lmstudio_config=self.lmstudio_config,
+                storage_config=self.storage_config
+            )
+
+            # Create compiler
+            compiler = ResearchCompiler(
+                research_id=self.research_id,
+                research_dir=self.research_dir,
+                file_manager=self.file_manager,
+                source_kb=self.source_kb,
+                research_agent=self.research_agent,
+                base_topic=self.base_topic
+            )
+
+            # Run compilation
+            conclusion_path = await compiler.compile_research()
+
+            if conclusion_path:
+                self.logger.success(f"Conclusion generated: {conclusion_path}")
+            else:
+                self.logger.info("Compilation cancelled or failed")
+
+        except KeyboardInterrupt:
+            self.logger.info("\n\nCompilation interrupted by user")
+
+        except Exception as e:
+            self.logger.error(f"Compilation error: {e}", exc_info=True)
+
+        finally:
+            # Cleanup
+            if self.vector_store:
+                self.vector_store.close()
+            if self.source_kb:
+                self.source_kb.close()
+
     async def cleanup(self):
         """Cleanup resources."""
         self.logger.header("Cleanup", style="cyan")
@@ -597,8 +665,10 @@ def main():
 Examples:
   python research_orchestrator.py                    # Interactive menu
   python research_orchestrator.py "AI in healthcare" # New research
-  python research_orchestrator.py --continue         # Continue latest
+  python research_orchestrator.py --continue         # Continue latest research
   python research_orchestrator.py --continue research-20250122-143022
+  python research_orchestrator.py --compile          # Compile latest into conclusion
+  python research_orchestrator.py --compile research-20250122-143022
 
 Note: Input files are automatically used in iteration 1 and evaluation loops.
 For more info, see README.md and ITERATION_FLOW.md
@@ -621,6 +691,16 @@ For more info, see README.md and ITERATION_FLOW.md
         const='latest',
         default=None,
         help="Continue existing research. Use 'latest' or specify research ID"
+    )
+
+    parser.add_argument(
+        "--compile",
+        dest="compile_research",
+        type=str,
+        nargs='?',
+        const='latest',
+        default=None,
+        help="Compile research into conclusion. Use 'latest' or specify research ID"
     )
 
     parser.add_argument(
@@ -684,8 +764,24 @@ For more info, see README.md and ITERATION_FLOW.md
     orchestrator.auto_select_files = auto_select
 
     try:
-        # Determine action: continue, new with topic, or interactive menu
-        if args.continue_research:
+        # Determine action: compile, continue, new with topic, or interactive menu
+        if args.compile_research:
+            # Auto-compile specified or latest research
+            result = orchestrator.research_selector.select_or_new(
+                auto_continue=args.compile_research
+            )
+            if result is None:
+                print("No research to compile.")
+                sys.exit(0)
+
+            action, session_info = result
+            if session_info:
+                asyncio.run(orchestrator.run_compile(session_info))
+            else:
+                print("No research found to compile.")
+                sys.exit(1)
+
+        elif args.continue_research:
             # Auto-continue specified or latest research
             result = orchestrator.research_selector.select_or_new(
                 auto_continue=args.continue_research
@@ -726,6 +822,9 @@ For more info, see README.md and ITERATION_FLOW.md
 
             elif action == 'continue' and session_info:
                 asyncio.run(orchestrator.run_continue(session_info))
+
+            elif action == 'compile' and session_info:
+                asyncio.run(orchestrator.run_compile(session_info))
 
     except KeyboardInterrupt:
         print("\n\n✅ Research session ended.")
