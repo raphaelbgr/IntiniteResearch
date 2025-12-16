@@ -33,19 +33,35 @@ class ResearchSelector:
         print("=" * 70)
         print("\nSelect an option:\n")
 
-        # Option 0: New research
-        print("  [0] Start NEW research")
+        # Option 0: New standard research
+        print("  [0] Start NEW research (standard web search)")
+        print()
+
+        # Option 1: Agentic Research
+        print("  [1] Start AGENTIC research (operator-supervised)")
+        print("      (Operator agent analyzes & guides + non-blocking user input)")
+        print()
+
+        # Option A: Agent0 Self-Evolving Research
+        print("  [A] Start Agent0 Self-Evolving Research")
+        print("      (Self-improving agents with curriculum/executor co-evolution)")
+        print()
+
+        # Option B: BMAD Multi-Agent Research
+        print("  [B] Start BMAD Multi-Agent Research")
+        print("      (Collaborate with expert agents: Analyst, Architect, PM, etc.)")
         print()
 
         if continuable:
             print("  --- Existing Research ---\n")
 
-            for i, session in enumerate(continuable, 1):
+            for i, session in enumerate(continuable, 2):
                 self._display_session_option(i, session)
 
             print()
             print("  --- Actions ---")
-            print(f"  [C] Compile/Generate CONCLUSION for a research")
+            print("  [C] Compile/Generate CONCLUSION for a research")
+            print("  [M] Start BMAD session for existing research")
             print()
 
         print("=" * 70)
@@ -53,26 +69,39 @@ class ResearchSelector:
         # Get user input
         while True:
             try:
-                choice = input("\nEnter choice (0=new, 1-N=continue, C=compile): ").strip()
+                choice = input("\nEnter choice (0=new, A=agent0, B=bmad, 1-N=continue, C=compile, M=bmad-existing): ").strip()
 
                 if choice == '0' or choice.lower() == 'new':
                     return ('new', None)
+
+                if choice == '1' or choice.lower() == 'agentic':
+                    return ('agentic', None)
+
+                if choice.lower() == 'a':
+                    return ('agent0', None)
+
+                if choice.lower() == 'b':
+                    return ('bmad_new', None)
 
                 if choice.lower() == 'c':
                     # Compile mode - ask which research
                     return self._select_for_compile(continuable)
 
+                if choice.lower() == 'm':
+                    # BMAD for existing research
+                    return self._select_for_bmad(continuable)
+
                 choice_num = int(choice)
 
-                if 1 <= choice_num <= len(continuable):
-                    selected = continuable[choice_num - 1]
+                if 2 <= choice_num <= len(continuable) + 1:
+                    selected = continuable[choice_num - 2]
                     print(f"\n>>> Continuing research: {selected['topic'][:60]}...")
                     return ('continue', selected)
                 else:
-                    print(f"Invalid choice. Enter 0-{len(continuable)} or C")
+                    print(f"Invalid choice. Enter 0, 1, A, B, 2-{len(continuable)+1}, C, or M")
 
             except ValueError:
-                print("Please enter a valid number or C")
+                print("Please enter a valid option: 0, 1, A, B, 2-N, C, or M")
             except KeyboardInterrupt:
                 print("\n\nExiting...")
                 return None
@@ -113,6 +142,51 @@ class ResearchSelector:
                     selected = sessions[choice_num - 1]
                     print(f"\n>>> Compiling: {selected['topic'][:50]}...")
                     return ('compile', selected)
+                else:
+                    print(f"Invalid. Enter 0-{len(sessions)}")
+
+            except ValueError:
+                print("Please enter a valid number")
+            except KeyboardInterrupt:
+                return None
+
+    def _select_for_bmad(self, sessions: list) -> Optional[Tuple[str, dict]]:
+        """Select a research session for BMAD multi-agent analysis.
+
+        Args:
+            sessions: List of available sessions
+
+        Returns:
+            Tuple of ('bmad_existing', session_info) or None
+        """
+        if not sessions:
+            print("No research sessions available for BMAD analysis.")
+            return None
+
+        print("\n" + "-" * 50)
+        print("SELECT RESEARCH FOR BMAD MULTI-AGENT SESSION")
+        print("-" * 50)
+        print("Expert agents will analyze your existing research.\n")
+
+        for i, session in enumerate(sessions, 1):
+            topic = session['topic'][:50] + "..." if len(session['topic']) > 50 else session['topic']
+            print(f"  [{i}] {topic}")
+            print(f"      v{session['latest_version']} | {session['total_sources']} sources")
+
+        print(f"  [0] Cancel")
+
+        while True:
+            try:
+                choice = input("\nSelect research for BMAD: ").strip()
+
+                if choice == '0':
+                    return self.display_menu()  # Go back to main menu
+
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(sessions):
+                    selected = sessions[choice_num - 1]
+                    print(f"\n>>> Starting BMAD session for: {selected['topic'][:50]}...")
+                    return ('bmad_existing', selected)
                 else:
                     print(f"Invalid. Enter 0-{len(sessions)}")
 

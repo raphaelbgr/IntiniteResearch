@@ -9,7 +9,17 @@
       "Bash(timeout 60 python:*)",
       "Bash(find:*)",
       "Bash(timeout 30 python:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dir /b \"C:\\Users\\rbgnr\\git\\BMAD-METHOD\\src\")",
+      "Bash(dir /b \"C:\\Users\\rbgnr\\git\\agno\\cookbook\\teams\" 2)",
+      "Bash(nul)",
+      "Bash(powershell -Command \"python -c ''import base64; content = base64.b64decode(b\"\"IiIiCkJNQUQgTXVsdGktQWdlbnQgVGVhbSB1c2luZyBBZ25vIFRlYW1zIEZyYW1ld29yawoiIiIKCmZyb20gdHlwaW5nIGltcG9ydCBEaWN0LCBMaXN0LCBBbnksIE9wdGlvbmFsLCBUdXBsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgKZnJvbSBkYXRhY2xhc3NlcyBpbXBvcnQgZGF0YWNsYXNzLCBmaWVsZAppbXBvcnQgeWFtbApmcm9tIHRleHR3cmFwIGltcG9ydCBkZWRlbnQKZnJvbSBkYXRldGltZSBpbXBvcnQgZGF0ZXRpbWUKCmZyb20gYWduby5hZ2VudCBpbXBvcnQgQWdlbnQKZnJvbSBhZ25vLm1vZGVscy5vcGVuYWkgaW1wb3J0IE9wZW5BSUNoYXQKZnJvbSBhZ25vLnRlYW0udGVhbSBpbXBvcnQgVGVhbQpmcm9tIGFnbm8uZGIuc3FsaXRlIGltcG9ydCBTcWxpdGVEYgoKZnJvbSB0b29scy5wYXJhbGxlbF9kZGcgaW1wb3J0IFBhcmFsbGVsRHVja0R1Y2tHb1NlYXJjaApmcm9tIHV0aWxzLmxvZ2dlciBpbXBvcnQgZ2V0X2xvZ2dlcgoKbG9nZ2VyID0gZ2V0X2xvZ2dlcigpCgpwcmludCgnU3VjY2VzcycpCg==\"\").decode(\"\"utf-8\"\"); print(content[:100])''\")",
+      "Bash(/tmp/writer.py)",
+      "Bash(dir:*)",
+      "Bash(timeout 3 python:*)",
+      "Bash(timeout 5 python:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

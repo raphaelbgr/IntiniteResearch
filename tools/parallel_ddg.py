@@ -222,7 +222,19 @@ class ParallelDuckDuckGoSearch(Toolkit):
             ParallelDuckDuckGoSearch.last_sources = results.get('all_sources', [])
 
             print(f"{'─'*70}")
+            # Extract and display domains
+            domains = {}
+            for source in results.get("all_sources", []):
+                url = source.get("url", "")
+                if url:
+                    from urllib.parse import urlparse
+                    domain = urlparse(url).netloc.replace("www.", "")
+                    domains[domain] = domains.get(domain, 0) + 1
+            top_domains = sorted(domains.items(), key=lambda x: x[1], reverse=True)[:8]
+            domain_str = ", ".join([f"{d}({c})" for d, c in top_domains])
             print(f"  TOTAL: {total_results} results | {len(results.get('all_sources', []))} unique links")
+            if domain_str:
+                print(f"  DOMAINS: {domain_str}")
             print(f"{'='*70}\n")
 
             return json_result
@@ -418,7 +430,19 @@ class ParallelDuckDuckGoSearch(Toolkit):
             ParallelDuckDuckGoSearch.last_sources = results.get('all_sources', [])
 
             print(f"{'─'*70}")
+            # Extract and display domains
+            domains = {}
+            for source in results.get("all_sources", []):
+                url = source.get("url", "")
+                if url:
+                    from urllib.parse import urlparse
+                    domain = urlparse(url).netloc.replace("www.", "")
+                    domains[domain] = domains.get(domain, 0) + 1
+            top_domains = sorted(domains.items(), key=lambda x: x[1], reverse=True)[:8]
+            domain_str = ", ".join([f"{d}({c})" for d, c in top_domains])
             print(f"  TOTAL: {total_results} results | {len(results.get('all_sources', []))} unique links")
+            if domain_str:
+                print(f"  DOMAINS: {domain_str}")
             print(f"{'='*70}\n")
 
             return json_result

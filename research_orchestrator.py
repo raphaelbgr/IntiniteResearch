@@ -44,6 +44,9 @@ from agents.research_agent import ResearchAgent
 from refinement.refiner import RefinementEngine
 from refinement.evaluator import ResearchEvaluator
 from refinement.compiler import ResearchCompiler
+from agents.bmad_orchestrator import BMadResearchSession
+from agents.agent0_orchestrator import start_agent0_session
+from agents.agentic_research import AgenticResearchSession
 
 
 class ResearchOrchestrator:
@@ -607,6 +610,309 @@ class ResearchOrchestrator:
             if self.source_kb:
                 self.source_kb.close()
 
+    async def run_bmad_new(self, research_topic: str):
+        """Start a NEW BMAD multi-agent research session.
+
+        Args:
+            research_topic: Research topic/objective
+        """
+        try:
+            self.logger.header("BMAD Multi-Agent Research", style="bold magenta")
+
+            # Create new research session
+            self.research_id = self.file_manager.create_research_id()
+            self.research_dir = self.file_manager.create_research_directory(self.research_id)
+            self.base_topic = research_topic
+
+            self.logger.info(f"Research ID: {self.research_id}")
+            self.logger.info(f"Topic: {research_topic[:60]}...")
+
+            # Initialize storage (scoped to research_id)
+            self.vector_store = VectorStore(
+                research_id=self.research_id,
+                base_dir=self.research_dir,
+                db_type=self.vector_db_config.get('type', 'sqlite')
+            )
+
+            self.source_kb = SourceKnowledgeBase(
+                research_id=self.research_id,
+                base_dir=self.research_dir
+            )
+
+            # Save initial metadata
+            metadata = {
+                'research_id': self.research_id,
+                'topic': research_topic,
+                'type': 'bmad_research',
+                'started_at': datetime.now().isoformat()
+            }
+            await self.file_manager.save_metadata(self.research_id, metadata)
+
+            # Create BMAD session with research-scoped storage
+            bmad_session = BMadResearchSession(
+                research_id=self.research_id,
+                research_dir=self.research_dir,
+                lmstudio_config=self.lmstudio_config,
+                source_kb=self.source_kb,
+                vector_store=self.vector_store
+            )
+
+            # Run automated session with Operator AI
+            self.logger.info("Starting AUTO MODE - Operator AI will make all decisions")
+            await bmad_session.run_auto_mode(goal=research_topic)
+
+        except KeyboardInterrupt:
+            self.logger.info("\n\nBMAD session interrupted by user")
+
+        except Exception as e:
+            self.logger.error(f"BMAD session error: {e}", exc_info=True)
+
+        finally:
+            if self.vector_store:
+                self.vector_store.close()
+            if self.source_kb:
+                self.source_kb.close()
+
+    async def run_agent0(self, research_topic: str):
+        """Start an Agent0 self-evolving research session.
+
+        Args:
+            research_topic: Initial research topic to bootstrap the system
+        """
+        try:
+            self.logger.header("Agent0 Self-Evolving Research", style="bold cyan")
+            self.logger.info("Initializing co-evolutionary agents...")
+
+            # Create new research session
+            self.research_id = self.file_manager.create_research_id()
+            self.research_dir = self.file_manager.create_research_directory(self.research_id)
+            self.base_topic = research_topic
+
+            self.logger.info(f"Research ID: {self.research_id}")
+            self.logger.info(f"Initial Topic: {research_topic[:60]}...")
+
+            # Initialize storage (scoped to research_id)
+            self.vector_store = VectorStore(
+                research_id=self.research_id,
+                base_dir=self.research_dir,
+                db_type=self.vector_db_config.get('type', 'sqlite')
+            )
+
+            # Prepare Agent0 configuration
+            agent0_config = {
+                'model': self.config.get('lmstudio', {}).get('model', 'gpt-4'),
+                'api_key': self.config.get('lmstudio', {}).get('api_key', ''),
+                'max_iterations': self.config.get('agent0', {}).get('max_iterations', 10),
+                'db_path': str(self.research_dir / 'agent0_session.db')
+            }
+
+            # Run Agent0 session
+            self.logger.info("Starting co-evolutionary loop...")
+            self.logger.info("Curriculum Agent: Generates increasingly complex research tasks")
+            self.logger.info("Executor Agent: Learns to solve tasks with improving capability")
+
+            results = await start_agent0_session(
+                config=agent0_config,
+                file_manager=self.file_manager,
+                vector_store=self.vector_store,
+                initial_topic=research_topic
+            )
+
+            # Display results summary
+            self.logger.section("Agent0 Research Complete")
+            self.logger.metric("Session Summary", {
+                'Total Iterations': results['session_summary']['total_iterations'],
+                'Final Task Complexity': f"{results['session_summary']['final_task_complexity']:.2f}",
+                'Average Confidence': f"{results['session_summary']['average_executor_confidence']:.2f}",
+                'Convergence': 'Yes' if results['session_summary']['convergence_achieved'] else 'No'
+            })
+
+            # Show key insights
+            self.logger.section("Key Insights")
+            for insight in results.get('key_insights', []):
+                self.logger.info(f"• {insight}")
+
+            # Save results
+            results_file = self.research_dir / 'agent0_final_report.json'
+            import json
+            with open(results_file, 'w') as f:
+                json.dump(results, f, indent=2)
+
+            self.logger.success(f"Full report saved to: {results_file}")
+
+            # Optionally compile to markdown
+            compile_choice = input("\nGenerate human-readable report? (y/n): ").strip().lower()
+            if compile_choice == 'y':
+                await self._compile_agent0_report(results)
+
+        except KeyboardInterrupt:
+            self.logger.warning("Agent0 session interrupted by user")
+        except Exception as e:
+            self.logger.error(f"Agent0 session error: {e}")
+            import traceback
+            self.logger.debug(traceback.format_exc())
+        finally:
+            # Cleanup
+            if self.vector_store:
+                self.vector_store.close()
+
+    async def _compile_agent0_report(self, results: dict):
+        """Compile Agent0 results into a readable markdown report."""
+        try:
+            report_lines = [
+                "# Agent0 Self-Evolving Research Report",
+                f"\n**Research ID:** {self.research_id}",
+                f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                f"**Initial Topic:** {self.base_topic}",
+                "",
+                "## Executive Summary",
+                "",
+                f"The Agent0 co-evolutionary system completed {results['session_summary']['total_iterations']} iterations, "
+                f"achieving a final task complexity of {results['session_summary']['final_task_complexity']:.2f} "
+                f"with an average executor confidence of {results['session_summary']['average_executor_confidence']:.2f}.",
+                "",
+                "## Evolution Trajectory",
+                "",
+                "| Iteration | Task Complexity | Executor Confidence | Curriculum Reward |",
+                "|-----------|----------------|--------------------|--------------------|"
+            ]
+
+            for step in results.get('evolution_trajectory', []):
+                report_lines.append(
+                    f"| {step['iteration']} | {step['complexity']:.2f} | "
+                    f"{step['confidence']:.2f} | {step['reward']:.2f} |"
+                )
+
+            report_lines.extend([
+                "",
+                "## Key Insights",
+                ""
+            ])
+
+            for insight in results.get('key_insights', []):
+                report_lines.append(f"- {insight}")
+
+            report_lines.extend([
+                "",
+                "## Research Depth Analysis",
+                "",
+                f"- **Total Sources Analyzed:** {results['research_outputs']['total_sources_analyzed']}",
+                f"- **Knowledge Base Size:** {results['research_outputs']['knowledge_base_size']} entries",
+                f"- **Research Depth Level:** {results['research_outputs']['research_depth']}",
+                "",
+                "---",
+                "",
+                "*Report generated by Agent0 Self-Evolving Research System*"
+            ])
+
+            # Save report
+            report_file = self.research_dir / 'agent0_report.md'
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(report_lines))
+
+            self.logger.success(f"Markdown report saved to: {report_file}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to compile Agent0 report: {e}")
+
+
+    async def run_agentic(self, research_topic: str):
+        """Start an Agentic research session with operator supervision.
+        
+        Args:
+            research_topic: Initial research topic
+        """
+        try:
+            self.logger.header("Agentic Research (Operator-Supervised)", style="bold green")
+            self.logger.info("Initializing operator agent and research agent...")
+            
+            # Create new research session
+            self.research_id = self.file_manager.create_research_id()
+            self.research_dir = self.file_manager.create_research_directory(self.research_id)
+            self.base_topic = research_topic
+            
+            self.logger.info(f"Research ID: {self.research_id}")
+            self.logger.info(f"Topic: {research_topic[:60]}...")
+            
+            # Create session
+            session = AgenticResearchSession(
+                research_id=self.research_id,
+                research_dir=self.research_dir,
+                lmstudio_config=self.lmstudio_config,
+                storage_config=self.storage_config
+            )
+            
+            # Run session
+            final_refinement = await session.run(research_topic)
+            
+            self.logger.success(f"Agentic research complete: {final_refinement}")
+            
+        except KeyboardInterrupt:
+            self.logger.warning("Agentic session interrupted by user")
+        except Exception as e:
+            self.logger.error(f"Agentic session error: {e}")
+            import traceback
+            self.logger.debug(traceback.format_exc())
+
+    async def run_bmad_existing(self, session_info: dict):
+        """Start BMAD session for an EXISTING research.
+
+        Args:
+            session_info: Dict with existing research session details
+        """
+        try:
+            self.research_id = session_info['research_id']
+            self.base_topic = session_info['topic']
+
+            self.logger.header("BMAD Analysis of Existing Research", style="bold magenta")
+            self.logger.info(f"Research ID: {self.research_id}")
+            self.logger.info(f"Topic: {self.base_topic[:60]}...")
+            self.logger.info(f"Existing versions: {session_info['latest_version']}")
+
+            # Get research directory
+            self.research_dir = self.file_manager.get_research_directory(self.research_id)
+
+            # Initialize storage (reconnect to existing)
+            self.vector_store = VectorStore(
+                research_id=self.research_id,
+                base_dir=self.research_dir,
+                db_type=self.vector_db_config.get('type', 'sqlite')
+            )
+
+            self.source_kb = SourceKnowledgeBase(
+                research_id=self.research_id,
+                base_dir=self.research_dir
+            )
+
+            # Show existing KB stats
+            kb_sources = self.source_kb.get_sources_count()
+            print(f"\n📚 Existing Knowledge Base: {kb_sources} sources")
+
+            # Create BMAD session with existing research storage
+            bmad_session = BMadResearchSession(
+                research_id=self.research_id,
+                research_dir=self.research_dir,
+                lmstudio_config=self.lmstudio_config,
+                source_kb=self.source_kb,
+                vector_store=self.vector_store
+            )
+
+            # Run automated session with Operator AI
+            self.logger.info("Starting AUTO MODE - Operator AI will make all decisions")
+            await bmad_session.run_auto_mode(goal=self.base_topic)
+
+        except KeyboardInterrupt:
+            self.logger.info("\n\nBMAD session interrupted by user")
+
+        except Exception as e:
+            self.logger.error(f"BMAD session error: {e}", exc_info=True)
+
+        finally:
+            if self.vector_store:
+                self.vector_store.close()
+            if self.source_kb:
+                self.source_kb.close()
+
     async def cleanup(self):
         """Cleanup resources."""
         self.logger.header("Cleanup", style="cyan")
@@ -654,6 +960,17 @@ class ResearchOrchestrator:
                 )
 
 
+
+
+def get_input_with_prefill(prompt_text, prefill=""):
+    """Get user input with optional pre-fill value."""
+    if prefill:
+        print(f"{prompt_text} [{prefill}]: ", end="", flush=True)
+        user_input = input().strip()
+        return user_input if user_input else prefill
+    else:
+        return input(f"{prompt_text}: ").strip()
+
 def main():
     """Main entry point."""
     import argparse
@@ -664,11 +981,16 @@ def main():
         epilog="""
 Examples:
   python research_orchestrator.py                    # Interactive menu
-  python research_orchestrator.py "AI in healthcare" # New research
+  python research_orchestrator.py "AI in healthcare" # New standard research
   python research_orchestrator.py --continue         # Continue latest research
   python research_orchestrator.py --continue research-20250122-143022
   python research_orchestrator.py --compile          # Compile latest into conclusion
   python research_orchestrator.py --compile research-20250122-143022
+  python research_orchestrator.py --bmad "Create a mobile app" # BMAD multi-agent session
+
+BMAD Multi-Agent Research:
+  Uses expert agents (Analyst, Architect, PM, UX, etc.) from BMAD-METHOD
+  to collaboratively analyze and plan your research objectives.
 
 Note: Input files are automatically used in iteration 1 and evaluation loops.
 For more info, see README.md and ITERATION_FLOW.md
@@ -701,6 +1023,16 @@ For more info, see README.md and ITERATION_FLOW.md
         const='latest',
         default=None,
         help="Compile research into conclusion. Use 'latest' or specify research ID"
+    )
+
+    parser.add_argument(
+        "--bmad",
+        dest="bmad_research",
+        type=str,
+        nargs='?',
+        const=None,
+        default=None,
+        help="Start BMAD multi-agent research session with given objective"
     )
 
     parser.add_argument(
@@ -762,10 +1094,25 @@ For more info, see README.md and ITERATION_FLOW.md
         evaluation_frequency=args.evaluation_frequency
     )
     orchestrator.auto_select_files = auto_select
+    orchestrator.prefill_topic = args.topic  # Store for pre-filling prompts
 
     try:
-        # Determine action: compile, continue, new with topic, or interactive menu
-        if args.compile_research:
+        # Determine action: bmad, compile, continue, or interactive menu
+        if args.bmad_research is not None:
+            # BMAD multi-agent research (--bmad or --bmad "objective")
+            if args.bmad_research:
+                # Objective provided directly
+                asyncio.run(orchestrator.run_bmad_new(args.bmad_research))
+            else:
+                # No objective - ask for it
+                print("\n🧙 BMAD Multi-Agent Research")
+                topic = input("Enter your research objective: ").strip()
+                if not topic:
+                    print("No objective provided. Exiting.")
+                    sys.exit(0)
+                asyncio.run(orchestrator.run_bmad_new(topic))
+
+        elif args.compile_research:
             # Auto-compile specified or latest research
             result = orchestrator.research_selector.select_or_new(
                 auto_continue=args.compile_research
@@ -797,12 +1144,8 @@ For more info, see README.md and ITERATION_FLOW.md
                 print("No continuable research found.")
                 sys.exit(1)
 
-        elif args.topic:
-            # New research with provided topic
-            asyncio.run(orchestrator.run(args.topic))
-
         else:
-            # Interactive menu - no topic provided
+            # Interactive menu (topic may be pre-filled if provided)
             result = orchestrator.research_selector.display_menu()
 
             if result is None:
@@ -814,11 +1157,42 @@ For more info, see README.md and ITERATION_FLOW.md
             if action == 'new':
                 # Get topic from user
                 print()
-                topic = input("Enter research topic: ").strip()
+                topic = get_input_with_prefill("Enter research topic", orchestrator.prefill_topic or "")
                 if not topic:
                     print("No topic provided. Exiting.")
                     sys.exit(0)
                 asyncio.run(orchestrator.run(topic))
+
+            elif action == 'agentic':
+                # New Agentic research (operator-supervised)
+                print()
+                topic = get_input_with_prefill("Enter topic for agentic research", orchestrator.prefill_topic or "")
+                if not topic:
+                    print("No topic provided. Exiting.")
+                    sys.exit(0)
+                asyncio.run(orchestrator.run_agentic(topic))
+
+            elif action == 'agent0':
+                # New Agent0 self-evolving research
+                print()
+                topic = get_input_with_prefill("Enter topic for Agent0", orchestrator.prefill_topic or "")
+                if not topic:
+                    print("No topic provided. Exiting.")
+                    sys.exit(0)
+                asyncio.run(orchestrator.run_agent0(topic))
+
+            elif action == 'bmad_new':
+                # New BMAD multi-agent research
+                print()
+                topic = get_input_with_prefill("Enter objective for BMAD", orchestrator.prefill_topic or "")
+                if not topic:
+                    print("No objective provided. Exiting.")
+                    sys.exit(0)
+                asyncio.run(orchestrator.run_bmad_new(topic))
+
+            elif action == 'bmad_existing' and session_info:
+                # BMAD session for existing research
+                asyncio.run(orchestrator.run_bmad_existing(session_info))
 
             elif action == 'continue' and session_info:
                 asyncio.run(orchestrator.run_continue(session_info))

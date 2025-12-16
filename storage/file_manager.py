@@ -49,6 +49,8 @@ class FileManager:
         (research_dir / "memory").mkdir(exist_ok=True)
         (research_dir / "logs").mkdir(exist_ok=True)
         (research_dir / "conclusion").mkdir(exist_ok=True)
+        (research_dir / "agent-conclusions").mkdir(exist_ok=True)
+        (research_dir / "bmad-sessions").mkdir(exist_ok=True)
 
         logger.info(f"Created research directory: {research_dir}")
 
