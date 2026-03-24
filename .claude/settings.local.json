@@ -19,7 +19,9 @@
       "Bash(timeout 3 python:*)",
       "Bash(timeout 5 python:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
