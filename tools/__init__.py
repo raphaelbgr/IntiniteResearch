@@ -2,9 +2,20 @@
 
 import os
 from .parallel_ddg import ParallelDuckDuckGoSearch
-from .tavily_search import TavilySearch
+
+try:
+    from .tavily_search import TavilySearch
+    _TAVILY_AVAILABLE = True
+except ImportError:
+    TavilySearch = None  # type: ignore
+    _TAVILY_AVAILABLE = False
 
 __all__ = ['ParallelDuckDuckGoSearch', 'TavilySearch', 'get_aggregated_search_data']
+
+
+def _empty_search_data() -> dict:
+    """Return an empty search-data envelope."""
+    return {'queries': [], 'performance': [], 'sources': []}
 
 
 def get_aggregated_search_data() -> dict:
@@ -20,7 +31,18 @@ def get_aggregated_search_data() -> dict:
     provider = os.environ.get("SEARCH_PROVIDER", "duckduckgo")
 
     ddg_data = ParallelDuckDuckGoSearch.get_last_search_data()
-    tavily_data = TavilySearch.get_last_search_data()
+
+    if _TAVILY_AVAILABLE:
+        tavily_data = TavilySearch.get_last_search_data()
+    else:
+        tavily_data = _empty_search_data()
+        if provider in ("tavily", "both"):
+            from utils.logger import get_logger
+            get_logger().warning(
+                "SEARCH_PROVIDER is '%s' but tavily-python is not installed; "
+                "Tavily data will be empty.",
+                provider,
+            )
 
     if provider == "tavily":
         return tavily_data

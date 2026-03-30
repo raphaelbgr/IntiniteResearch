@@ -8,8 +8,14 @@ from agno.models.openai import OpenAIChat
 from agno.knowledge import Knowledge
 from agno.db.sqlite import SqliteDb
 from tools.parallel_ddg import ParallelDuckDuckGoSearch
-from tools.tavily_search import TavilySearch
 from utils.logger import get_logger
+
+try:
+    from tools.tavily_search import TavilySearch
+    _TAVILY_AVAILABLE = True
+except ImportError:
+    TavilySearch = None  # type: ignore
+    _TAVILY_AVAILABLE = False
 
 logger = get_logger()
 
@@ -91,7 +97,12 @@ class ResearchAgent:
 
         if search_provider in ("tavily", "both"):
             tavily_api_key = os.environ.get("TAVILY_API_KEY", "")
-            if tavily_api_key:
+            if not _TAVILY_AVAILABLE:
+                logger.warning(
+                    "search_provider includes 'tavily' but tavily-python is not installed; "
+                    "skipping Tavily tool"
+                )
+            elif tavily_api_key:
                 tavily_search = TavilySearch(
                     enable_search=True,
                     enable_news=True,

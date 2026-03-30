@@ -16,8 +16,11 @@ logger = get_logger()
 
 try:
     from tavily import TavilyClient, AsyncTavilyClient
+    _TAVILY_SDK_AVAILABLE = True
 except ImportError:
-    raise ImportError("`tavily-python` not installed. Please install using `pip install tavily-python`")
+    TavilyClient = None  # type: ignore
+    AsyncTavilyClient = None  # type: ignore
+    _TAVILY_SDK_AVAILABLE = False
 
 
 class TavilySearch(Toolkit):
@@ -49,12 +52,15 @@ class TavilySearch(Toolkit):
         search_depth: str = "basic",
         **kwargs,
     ):
+        if not _TAVILY_SDK_AVAILABLE:
+            raise ImportError(
+                "`tavily-python` not installed. Please install using `pip install tavily-python`"
+            )
         self.api_key = api_key or os.environ.get("TAVILY_API_KEY", "")
         if not self.api_key:
             raise ValueError(
                 "Tavily API key is required. Set TAVILY_API_KEY env var or pass api_key."
             )
-        self.client = TavilyClient(api_key=self.api_key)
         self.fixed_max_results: Optional[int] = fixed_max_results
         self.search_depth: str = search_depth
 
