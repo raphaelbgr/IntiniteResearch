@@ -1,4 +1,5 @@
 """Main research agent using Agno framework."""
+import os
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from textwrap import dedent
@@ -7,6 +8,7 @@ from agno.models.openai import OpenAIChat
 from agno.knowledge import Knowledge
 from agno.db.sqlite import SqliteDb
 from tools.parallel_ddg import ParallelDuckDuckGoSearch
+from tools.tavily_search import TavilySearch
 from utils.logger import get_logger
 
 logger = get_logger()
@@ -69,20 +71,58 @@ class ResearchAgent:
             max_tokens=self.lmstudio_config.get('max_tokens', 4096)
         )
 
-        # Initialize parallel search tool
-        parallel_search = ParallelDuckDuckGoSearch(
-            enable_search=True,
-            enable_news=True,
-            fixed_max_results=5,
-            timeout=10
+        # Determine search provider from config or env
+        search_provider = os.environ.get(
+            "SEARCH_PROVIDER",
+            "duckduckgo"
         )
+
+        # Build search tools list based on provider setting
+        search_tools = []
+
+        if search_provider in ("duckduckgo", "both"):
+            parallel_search = ParallelDuckDuckGoSearch(
+                enable_search=True,
+                enable_news=True,
+                fixed_max_results=5,
+                timeout=10
+            )
+            search_tools.append(parallel_search)
+
+        if search_provider in ("tavily", "both"):
+            tavily_api_key = os.environ.get("TAVILY_API_KEY", "")
+            if tavily_api_key:
+                tavily_search = TavilySearch(
+                    enable_search=True,
+                    enable_news=True,
+                    api_key=tavily_api_key,
+                    fixed_max_results=5,
+                    search_depth="basic",
+                )
+                search_tools.append(tavily_search)
+                logger.info("Tavily search tool enabled")
+            else:
+                logger.warning(
+                    "search_provider includes 'tavily' but TAVILY_API_KEY is not set; "
+                    "skipping Tavily tool"
+                )
+
+        # Fallback: if no tools were configured, default to DuckDuckGo
+        if not search_tools:
+            logger.warning("No search tools configured; falling back to DuckDuckGo")
+            search_tools.append(ParallelDuckDuckGoSearch(
+                enable_search=True,
+                enable_news=True,
+                fixed_max_results=5,
+                timeout=10
+            ))
 
         # Create agent with db, tools, and instructions
         agent = Agent(
             name="ResearchAssistant",
             model=model,
             db=self.storage,  # In Agno 2.3.x, use 'db' parameter
-            tools=[parallel_search],
+            tools=search_tools,
             description=(
                 "An advanced research assistant with web search capabilities, "
                 "capable of conducting deep research, analyzing information, and "

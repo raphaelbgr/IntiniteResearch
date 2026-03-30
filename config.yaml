@@ -15,6 +15,11 @@ research:
   output_dir: "./generation"
   max_refinements: null  # null = infinite, or set a number to limit
 
+  # Search provider: 'duckduckgo' (default), 'tavily', or 'both'
+  search_provider: "duckduckgo"
+  # Tavily API key (can also be set via TAVILY_API_KEY env var)
+  tavily_api_key: null
+
   # Evaluation/comparison loop
   enable_evaluation: true   # Enable progress evaluation reports
   evaluation_frequency: 10  # Run evaluation every N iterations
