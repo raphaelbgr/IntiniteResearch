@@ -2,6 +2,8 @@ r"""
 Parallel Tavily Search Tool - Following Agno's Toolkit pattern
 Mirrors the ParallelDuckDuckGoSearch interface for drop-in compatibility.
 """
+import asyncio
+import concurrent.futures
 import json
 import os
 import time
@@ -13,7 +15,7 @@ from utils.logger import get_logger
 logger = get_logger()
 
 try:
-    from tavily import TavilyClient
+    from tavily import TavilyClient, AsyncTavilyClient
 except ImportError:
     raise ImportError("`tavily-python` not installed. Please install using `pip install tavily-python`")
 
@@ -177,7 +179,63 @@ class TavilySearch(Toolkit):
         max_results: int,
         topic: str = "general"
     ) -> dict:
-        """Execute queries via Tavily and build the standard response envelope."""
+        """Execute queries via Tavily in parallel and build the standard response envelope."""
+        try:
+            loop = asyncio.get_running_loop()
+            # Already in an async context — run in a thread to avoid blocking
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    self._run_parallel_searches_sync, queries, max_results, topic
+                )
+                return future.result()
+        except RuntimeError:
+            # No running loop — create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(
+                    self._execute_parallel_searches(queries, max_results, topic)
+                )
+            finally:
+                loop.close()
+
+    def _run_parallel_searches_sync(
+        self,
+        queries: List[str],
+        max_results: int,
+        topic: str
+    ) -> dict:
+        """Run parallel Tavily searches from a sync context."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(
+                self._execute_parallel_searches(queries, max_results, topic)
+            )
+        finally:
+            loop.close()
+
+    async def _execute_parallel_searches(
+        self,
+        queries: List[str],
+        max_results: int,
+        topic: str
+    ) -> dict:
+        """Execute all queries concurrently using AsyncTavilyClient."""
+        async_client = AsyncTavilyClient(api_key=self.api_key)
+
+        async def _search_one(query: str):
+            log_debug(f"Searching Tavily for: {query} (topic={topic})")
+            return await async_client.search(
+                query=query,
+                max_results=max_results,
+                search_depth=self.search_depth,
+                topic=topic,
+            )
+
+        tasks = [_search_one(q) for q in queries]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
         response = {
             "total_queries": len(queries),
             "successful_queries": 0,
@@ -188,55 +246,46 @@ class TavilySearch(Toolkit):
 
         seen_urls: set = set()
 
-        for query in queries:
-            try:
-                log_debug(f"Searching Tavily for: {query} (topic={topic})")
-                tavily_resp = self.client.search(
-                    query=query,
-                    max_results=max_results,
-                    search_depth=self.search_depth,
-                    topic=topic,
-                )
-                results = tavily_resp.get("results", [])
-
-                # Normalize to DDG-compatible format
-                normalized: List[dict] = []
-                for item in results:
-                    url = item.get("url", "")
-                    title = item.get("title", "Unknown")
-                    snippet = item.get("content", "")[:200]
-
-                    normalized.append({
-                        "title": title,
-                        "href": url,
-                        "body": item.get("content", ""),
-                    })
-
-                    if url and url not in seen_urls:
-                        seen_urls.add(url)
-                        response["all_sources"].append({
-                            "title": title,
-                            "url": url,
-                            "snippet": snippet,
-                        })
-
-                response["queries"].append({
-                    "query": query,
-                    "status": "success",
-                    "result_count": len(normalized),
-                    "results": normalized,
-                })
-                response["successful_queries"] += 1
-                response["total_results"] += len(normalized)
-
-            except Exception as e:
-                log_debug(f"Tavily search failed for '{query}': {e}")
+        for query, result in zip(queries, results):
+            if isinstance(result, Exception):
+                log_debug(f"Tavily search failed for '{query}': {result}")
                 response["queries"].append({
                     "query": query,
                     "status": "failed",
-                    "error": str(e),
+                    "error": str(result),
                     "results": [],
                 })
+                continue
+
+            items = result.get("results", [])
+            normalized: List[dict] = []
+            for item in items:
+                url = item.get("url", "")
+                title = item.get("title", "Unknown")
+                snippet = item.get("content", "")[:200]
+
+                normalized.append({
+                    "title": title,
+                    "href": url,
+                    "body": item.get("content", ""),
+                })
+
+                if url and url not in seen_urls:
+                    seen_urls.add(url)
+                    response["all_sources"].append({
+                        "title": title,
+                        "url": url,
+                        "snippet": snippet,
+                    })
+
+            response["queries"].append({
+                "query": query,
+                "status": "success",
+                "result_count": len(normalized),
+                "results": normalized,
+            })
+            response["successful_queries"] += 1
+            response["total_results"] += len(normalized)
 
         return response
 

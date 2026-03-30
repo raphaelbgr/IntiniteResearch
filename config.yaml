@@ -16,8 +16,11 @@ research:
   max_refinements: null  # null = infinite, or set a number to limit
 
   # Search provider: 'duckduckgo' (default), 'tavily', or 'both'
+  # NOTE: These config.yaml values are placeholders for documentation only.
+  # The authoritative settings are the environment variables:
+  #   SEARCH_PROVIDER  (default: 'duckduckgo')
+  #   TAVILY_API_KEY   (required when provider includes 'tavily')
   search_provider: "duckduckgo"
-  # Tavily API key (can also be set via TAVILY_API_KEY env var)
   tavily_api_key: null
 
   # Evaluation/comparison loop
