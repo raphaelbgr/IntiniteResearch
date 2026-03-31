@@ -253,7 +253,7 @@ class AgentMessage:
 class BMadAgentLoader:
     """Loads and parses BMAD agent definitions from YAML files."""
 
-    def __init__(self, bmad_path: str = "C:/Users/rbgnr/git/BMAD-METHOD/src"):
+    def __init__(self, bmad_path: str = "~/git/BMAD-METHOD/src"):
         """Initialize loader.
 
         Args:
@@ -557,7 +557,7 @@ class BMadOrchestrator:
         session_dir: Path,
         source_kb=None,
         vector_store=None,
-        bmad_path: str = "C:/Users/rbgnr/git/BMAD-METHOD/src"
+        bmad_path: str = "~/git/BMAD-METHOD/src"
     ):
         """Initialize orchestrator.
 
@@ -1114,7 +1114,7 @@ class BMadTeamsSession:
         lmstudio_config: Dict[str, Any],
         source_kb=None,
         vector_store=None,
-        bmad_path: str = "C:/Users/rbgnr/git/BMAD-METHOD/src"
+        bmad_path: str = "~/git/BMAD-METHOD/src"
     ):
         self.research_id = research_id
         self.research_dir = research_dir

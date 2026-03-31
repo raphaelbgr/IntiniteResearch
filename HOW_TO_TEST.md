@@ -13,7 +13,7 @@
 Open your terminal in the InfiniteResearch directory:
 
 ```bash
-cd C:\Users\rbgnr\git\InfiniteResearch
+cd ~/git\InfiniteResearch
 ```
 
 Install all required packages:
@@ -210,7 +210,7 @@ Topic: What is Python programming?
 ╔═══ Input File Selection ═══╗
 
 No files found in input directory
-Place files in: C:\Users\rbgnr\git\InfiniteResearch\input
+Place files in: ~/git\InfiniteResearch\input
 
 Options:
   0 - No input files (prompt only)

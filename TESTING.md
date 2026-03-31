@@ -154,7 +154,7 @@ Initializing research: Python programming...
 ╔═══ Input File Selection ═══╗
 
 No files found in input directory
-Place files in: C:\Users\rbgnr\git\InfiniteResearch\input
+Place files in: ~/git\InfiniteResearch\input
 
 Options:
   0 - No input files (prompt only)

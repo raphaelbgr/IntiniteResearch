@@ -349,7 +349,7 @@ deactivate
 3. Under "User variables", find "Path"
 4. Click "Edit"
 5. Click "New"
-6. Add: `C:\Users\rbgnr\AppData\Local\Programs\Python\Python3XX\Scripts`
+6. Add: `~/AppData\Local\Programs\Python\Python3XX\Scripts`
 7. OK, OK, OK
 8. **Restart terminal**
 9. Now `pip` will work directly!

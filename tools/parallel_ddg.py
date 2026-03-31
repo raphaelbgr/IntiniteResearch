@@ -1,6 +1,6 @@
 r"""
 Parallel DuckDuckGo Search Tool - Following Agno's DuckDuckGoTools pattern
-Based on: C:\Users\rbgnr\git\agno\libs\agno\agno\tools\duckduckgo.py
+Based on: ~/git\agno\libs\agno\agno\tools\duckduckgo.py
 """
 import json
 import asyncio

@@ -5,7 +5,7 @@ This document explains how we're using Agno's established patterns instead of re
 ## ✅ What We Learned from Local Agno Cookbook
 
 ### Location
-`C:\Users\rbgnr\git\agno\cookbook\`
+`~/git\agno\cookbook\`
 
 ### Key Files Examined
 1. **`tools/duckduckgo_tools.py`** - How to use DuckDuckGoTools
@@ -391,19 +391,19 @@ sources = [
 
 ```bash
 # How to use DuckDuckGo
-C:\Users\rbgnr\git\agno\cookbook\tools\duckduckgo_tools.py
+~/git\agno\cookbook\tools\duckduckgo_tools.py
 
 # DuckDuckGo source code
-C:\Users\rbgnr\git\agno\libs\agno\agno\tools\duckduckgo.py
+~/git\agno\libs\agno\agno\tools\duckduckgo.py
 
 # Structured outputs
-C:\Users\rbgnr\git\agno\cookbook\agents\async\structured_output.py
+~/git\agno\cookbook\agents\async\structured_output.py
 
 # RAG with knowledge
-C:\Users\rbgnr\git\agno\cookbook\agents\agentic_search\agentic_rag.py
+~/git\agno\cookbook\agents\agentic_search\agentic_rag.py
 
 # All available tools
-C:\Users\rbgnr\git\agno\cookbook\tools\
+~/git\agno\cookbook\tools\
 ```
 
 ---
