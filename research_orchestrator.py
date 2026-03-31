@@ -391,9 +391,9 @@ class ResearchOrchestrator:
         # Execute research with parallel search capabilities
         research_doc = await self.research_agent.research(research_prompt)
 
-        # Get the ACTUAL search terms used by AI from the parallel_search tool
-        from tools.parallel_ddg import ParallelDuckDuckGoSearch
-        search_data = ParallelDuckDuckGoSearch.get_last_search_data()
+        # Get the ACTUAL search terms used by AI from the active search provider(s)
+        from tools import get_aggregated_search_data
+        search_data = get_aggregated_search_data()
 
         # Use actual search terms from the AI's searches
         actual_search_terms = search_data['queries'] if search_data['queries'] else ['initial research']
