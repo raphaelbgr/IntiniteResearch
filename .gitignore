@@ -41,9 +41,6 @@ generation/
 # Configuration (if contains sensitive data)
 # config.yaml
 
-# Claude Code
-.claude/
-
 # OS
 .DS_Store
 Thumbs.db
